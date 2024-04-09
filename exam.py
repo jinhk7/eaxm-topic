@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime
 
 def http_requests(url):
+    # 发送HTTP请求并返回响应对象
     headers = {
         'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Microsoft Edge";v="122"',
         'DNT': '1',
@@ -16,16 +17,19 @@ def http_requests(url):
     response = requests.get(url, headers=headers)
     return response
 
-def save2html(str, file_path):
+def save2html(content, file_path):
+    # 将内容保存到HTML文件中
     with open(file_path, 'a', encoding='utf-8') as f:
-        f.write(str)
+        f.write(content)
     print('追加文件成功')
 
-def save2text(str, file_path):
+def save2text(content, file_path):
+    # 将内容保存到文本文件中
     with open(file_path, 'a', encoding='utf-8') as f:
-        f.write(str)
+        f.write(content)
 
 def abc2num(str):
+    # 将选项字母转换为数字形式
     str = str.replace('A', '1')
     str = str.replace('B', '2')
     str = str.replace('C', '3')
@@ -39,6 +43,7 @@ def abc2num(str):
     return str_num
 
 def format_question(url):
+    # 格式化问题并返回格式化后的文本
     bs1 = BeautifulSoup(http_requests(url).text, "html.parser")
     soup = bs1.select('[class="discussion-header-container"]')
     question_num = soup[0].find('div', class_='question-discussion-header').find('div').get_text(separator='\n',strip=True)
@@ -52,18 +57,21 @@ def format_question(url):
     options_text = [option.get_text(strip=True) for option in options_elements]
     question_text = '\n'.join(line.strip() for line in question_text.split('\n'))
 
+    # 构建格式化后的问题文本
     result = f'{question_num}'
     result += f'{question_text}'
     result += f'选项：\n'
     for option in options_text:
         formatted_option = f'{option[0]} {option[1:]}'
         result += f'{formatted_option}\n'
+
     result += f'答案： {answer[0]["voted_answers"]}\n'
     result += f'\n\n\n'
     return result
 
 
 def format_question_anki(url):
+    # 格式化问题以适应Anki，并返回格式化后的文本
     bs1 = BeautifulSoup(http_requests(url).text, "html.parser")
     soup = bs1.select('[class="discussion-header-container"]')
     answer_abc = json.loads(soup[0].find('div', class_='voted-answers-tally').find('script').get_text())[0]['voted_answers']
@@ -89,6 +97,7 @@ def format_question_anki(url):
     return question_all
 
 def help_message():
+    # 打印帮助信息
     print("Usage:")
     print("python script.py -u URL_FILE [--output OUTPUT_FILE] [-m MODE]")
     print("Modes:")
@@ -96,6 +105,7 @@ def help_message():
     print("  anki     : Output questions and answers in Anki mode.")
 
 def main():
+    # 主函数，解析命令行参数并执行相应操作
     parser = argparse.ArgumentParser(description='Scraping Questions and Answers from URLs in a file')
     parser.add_argument('-u', '--url_file', metavar='URL_FILE', type=str, help='Path to the file containing URLs', required=True)
     parser.add_argument('--output', '-o', type=str, help='Output file path')
