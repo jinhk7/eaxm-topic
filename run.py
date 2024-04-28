@@ -2,6 +2,7 @@
 import os
 import argparse
 from datetime import datetime
+from time import sleep
 from src import  saver, scraper
 
 def help_message():
@@ -46,6 +47,7 @@ def main():
             formatted_question = scraper.format_question(url)
             saver.save2text(formatted_question, output_text_file)
         print(f'完成第 {count} 个题目收集，地址为：{url}')
+        sleep(1)
 
 if __name__ == "__main__":
     main()

@@ -13,7 +13,12 @@ def format_question(url):
     img_tags = soup[0].find_all('img')
     for img_tag in img_tags:
         img_tag.replace_with(img_tag['src'])
-    answer = json.loads(soup[0].find('div', class_='voted-answers-tally').find('script').get_text())
+    voted_answers = json.loads(soup[0].find('div', class_='voted-answers-tally').find('script').get_text())
+    correct_answer = soup[0].find('span', class_='correct-answer').get_text()
+    if not voted_answers:
+        finally_answer = correct_answer
+    else:
+        finally_answer = voted_answers[0]['voted_answers']
     question_element = soup[0].find('div', class_='question-body')
     question_text = question_element.find('p', class_='card-text').get_text()
     options_elements = question_element.find_all('li', class_='multi-choice-item')
@@ -28,7 +33,7 @@ def format_question(url):
         formatted_option = f'{option[0]} {option[1:]}'
         result += f'{formatted_option}\n'
 
-    result += f'答案： {answer[0]["voted_answers"]}\n'
+    result += f'答案： {finally_answer}\n'
     result += f'\n\n\n'
     return result
 
@@ -37,8 +42,13 @@ def format_question_anki(url):
     # 格式化问题以适应Anki，并返回格式化后的文本
     bs1 = BeautifulSoup(http_requests(url).text, "html.parser")
     soup = bs1.select('[class="discussion-header-container"]')
-    answer_abc = json.loads(soup[0].find('div', class_='voted-answers-tally').find('script').get_text())[0]['voted_answers']
-    answer_num = abc2num(answer_abc)
+    voted_answers = json.loads(soup[0].find('div', class_='voted-answers-tally').find('script').get_text())
+    correct_answer = soup[0].find('span', class_='correct-answer').get_text()
+    if not voted_answers:
+        finally_answer = correct_answer
+    else:
+        finally_answer = voted_answers[0]['voted_answers']
+    answer_num = abc2num(finally_answer)
     question_num = soup[0].find('div', class_='question-discussion-header').find('div').get_text(separator='\n',strip=True)
     question_element = soup[0].find('div', class_='question-body')
     question_text = question_element.find('p', class_='card-text')
